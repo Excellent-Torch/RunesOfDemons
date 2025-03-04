@@ -1,0 +1,45 @@
+// Copyright 2022 Stream.IO, Inc. All Rights Reserved.
+
+#pragma once
+
+#include "Components/Image.h"
+#include "Components/TextBlock.h"
+#include "CoreMinimal.h"
+#include "StreamWidget.h"
+#include "User/UserRef.h"
+
+#include "ProfilePicWidget.generated.h"
+
+/**
+ *
+ */
+UCLASS()
+class STREAMCHATUI_API UProfilePicWidget final : public UStreamWidget
+{
+    GENERATED_BODY()
+
+public:
+    UFUNCTION(BlueprintCallable, Category = "Stream Chat")
+    void Setup(const FUserRef& InUser);
+    UFUNCTION(BlueprintCallable, Category = "Stream Chat")
+    void SetupWithUrl(const FString& InImageUrl);
+
+protected:
+    UPROPERTY(meta = (BindWidget))
+    UImage* Image;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* InitialsTextBlock;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Setup)
+    FUserRef User;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Setup)
+    FString ImageUrl;
+
+private:
+    virtual void OnSetup() override;
+
+    FString GetUrl() const;
+    void FetchRemoteImage();
+};

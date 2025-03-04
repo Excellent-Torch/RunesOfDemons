@@ -1,0 +1,96 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/HUD.h"
+#include "MediaPlayer.h"
+#include "FileMediaSource.h"
+#include "DemonHUD.generated.h"
+
+
+USTRUCT(BlueprintType)
+struct FHUDPackage
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY()
+	class UTexture2D* CrosshairsCenter;
+	UPROPERTY()
+	UTexture2D* CrosshairsLeft;
+	UPROPERTY()
+	UTexture2D* CrosshairsRight;
+	UPROPERTY()
+	UTexture2D* CrosshairsTop;
+	UPROPERTY()
+	UTexture2D* CrosshairsBottom;
+	UPROPERTY()
+	float CrosshairSpread;
+	UPROPERTY()
+	FLinearColor CrosshairsColor;
+
+};
+
+/**
+ * 
+ */
+UCLASS()
+class CEYLONDEMONS_API ADemonHUD : public AHUD
+{
+	GENERATED_BODY()
+
+public:
+	virtual void DrawHUD() override;
+
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	TSubclassOf<class UUserWidget> CharacterOverlayClass;
+	void AddCharacterOverlay();
+
+	UPROPERTY()
+	class UCharacterOverlay* CharacterOverlay;
+
+
+	UPROPERTY(EditAnywhere, Category = "Annnouncements")
+	TSubclassOf<UUserWidget> AnnouncementClass;
+
+	UPROPERTY()
+	class UAnnouncement* Announcement;
+
+	void AddAnnouncemnet();
+
+	void AddElimAnnouncement(FString Attacker, FString Victim);
+protected:
+	virtual void BeginPlay() override;
+
+private:
+	UPROPERTY()
+	class APlayerController* OwningPlayer;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UElimAnnouncement> ElimAnnouncementClass;
+
+	UPROPERTY()
+	FHUDPackage HUDPackage;
+
+	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor CrosshairColor);
+
+	UPROPERTY(EditAnywhere)
+	float CrosshairSpreadMax = 16.f;
+
+	UPROPERTY(EditAnywhere)
+	float ElimAnnouncementTime = 2.5f;
+
+	UFUNCTION()
+	void ElimAnnouncementTimerFinished(UElimAnnouncement* MsgToRemove);
+
+	UPROPERTY()
+	TArray<UElimAnnouncement*> ElimMessages;
+
+	// Media Player
+	UPROPERTY(EditAnywhere)
+	UMediaPlayer* MediaPlayer;
+
+	UPROPERTY(EditAnywhere)
+	UFileMediaSource* MediaSource;
+public:
+	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
+};
+
