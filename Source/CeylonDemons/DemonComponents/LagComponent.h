@@ -11,7 +11,6 @@ struct FCapsuleInformation
 {
 	GENERATED_BODY()
 
-
 	UPROPERTY()
 	FVector Location;
 
@@ -63,5 +62,9 @@ private:
 	UPROPERTY()
 	class ADemonPlayerController* Controller;
 
+	TDoubleLinkedList<FFramePackage> FrameHistory;
+
+	UPROPERTY(EditAnywhere)
+	float MaxRecordTime = 4.f;
 
 };

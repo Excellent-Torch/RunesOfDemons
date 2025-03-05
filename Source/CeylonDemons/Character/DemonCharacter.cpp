@@ -253,6 +253,57 @@ void ADemonCharacter::SavePlayerLocation()
 	}
 }
 
+void ADemonCharacter::SetupHitBox()
+{
+	UPhysicsAsset* PhysicsAsset = GetMesh()->GetPhysicsAsset();
+	if (!PhysicsAsset) return;
+
+
+	FPhysicsAssetInformation CapsuleInformation;
+
+	for (auto BodySetup : PhysicsAsset->SkeletalBodySetups)
+	{
+		if (!BodySetup) continue;
+
+		FName BoneName = BodySetup->BoneName;
+		int32 BoneIndex = GetMesh()->GetBoneIndex(BoneName);
+		if (BoneIndex == INDEX_NONE) continue;
+
+		FTransform BoneTransform = GetMesh()->GetBoneTransform(BoneIndex);
+
+
+		for (auto CapsuleElem : BodySetup->AggGeom.SphylElems)
+		{
+			//BoneTransform.TransformPosition(CapsuleElem.Center);
+			CapsuleInformation.BoneName = BoneName;
+			CapsuleInformation.Transform = CapsuleElem.GetTransform();
+			CapsuleInformation.Rotation = CapsuleElem.Rotation;
+			CapsuleInformation.HalfHeight = CapsuleElem.Length * 0.5f;
+			CapsuleInformation.Radius = CapsuleElem.Radius;
+
+			//PhysicsAssetInfo.Add(CapsuleInformation);
+			ConstructHitBox(CapsuleInformation);
+
+			//CapsuleInformation.Add(BoneName, CapsuleInformation);
+		}
+	}
+}
+
+void ADemonCharacter::ConstructHitBox(FPhysicsAssetInformation PhysicsAssetInfo)
+{
+	UCapsuleComponent* HitCapsule;
+	HitCapsule = NewObject<UCapsuleComponent>(this, UCapsuleComponent::StaticClass(), PhysicsAssetInfo.BoneName, RF_Transient);
+
+	HitCapsule->SetupAttachment(GetMesh(), PhysicsAssetInfo.BoneName);
+	HitCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCapsule->SetWorldTransform(PhysicsAssetInfo.Transform);
+	HitCapsule->SetCapsuleHalfHeight(PhysicsAssetInfo.HalfHeight);
+	HitCapsule->SetCapsuleRadius(PhysicsAssetInfo.Radius);
+
+	HitCapsule->RegisterComponent();
+	HitBoxInfo.Add(PhysicsAssetInfo.BoneName, HitCapsule);
+}
+
 void ADemonCharacter::BeginPlay()
 {
 	Super::BeginPlay();

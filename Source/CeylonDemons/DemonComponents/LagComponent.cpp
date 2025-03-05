@@ -1,6 +1,6 @@
 #include "LagComponent.h"
 #include "CeylonDemons/Character/DemonCharacter.h"
-#include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "PhysicsEngine/PhysicsAsset.h"
 #include "PhysicsEngine/BodySetup.h"
 #include "PhysicsEngine/AggregateGeom.h"
@@ -20,7 +20,25 @@ void ULagComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-
+	if (FrameHistory.Num() <= 1)
+	{
+		FFramePackage ThisFrame;
+		SaveFramePackage(ThisFrame);
+		FrameHistory.AddHead(ThisFrame);
+	}
+	else
+	{
+		float HistoryLength = FrameHistory.GetHead()->GetValue().Time - FrameHistory.GetTail()->GetValue().Time;
+		while (HistoryLength > MaxRecordTime)
+		{
+			FrameHistory.RemoveNode(FrameHistory.GetTail());
+			HistoryLength = FrameHistory.GetHead()->GetValue().Time - FrameHistory.GetTail()->GetValue().Time;
+		}
+		FFramePackage ThisFrame;
+		SaveFramePackage(ThisFrame);
+		FrameHistory.AddHead(ThisFrame);
+		//ShowFramePackage(ThisFrame, FColor::Red);
+	}
 }
 
 void ULagComponent::BeginPlay()
@@ -38,50 +56,27 @@ void ULagComponent::SaveFramePackage(FFramePackage& Package)
 	
 	if (Character)
 	{
-		if (Character->GetMesh() == nullptr || Character->GetMesh()->GetPhysicsAsset() == nullptr) return;
-		UPhysicsAsset* PhysicsAsset = Character->GetMesh()->GetPhysicsAsset();
-		if (!PhysicsAsset) return;
 
-		
-		for (const auto& BodySetup : PhysicsAsset->SkeletalBodySetups)
+		for (auto& HitBoxInfo : Character->HitBoxInfo)
 		{
-			if (!BodySetup) continue;
+			FCapsuleInformation CapsuleInformation;
+			//BoneTransform.TransformPosition(CapsuleElem.Center);
+			CapsuleInformation.Location = HitBoxInfo.Value->GetComponentLocation();
+			CapsuleInformation.Rotation = HitBoxInfo.Value->GetComponentRotation();
+			CapsuleInformation.HalfHeight = HitBoxInfo.Value->GetScaledCapsuleHalfHeight();
+			CapsuleInformation.Radius = HitBoxInfo.Value->GetScaledCapsuleRadius();
+			
+		
 
-			FName BoneName = BodySetup->BoneName;
-			int32 BoneIndex = Character->GetMesh()->GetBoneIndex(BoneName);
-			if (BoneIndex == INDEX_NONE) continue;
-
-			FTransform BoneTransform = Character->GetMesh()->GetBoneTransform(BoneIndex);
-
-			Package.Time = GetWorld()->GetTimeSeconds();
-			for (const auto& CapsuleElem : BodySetup->AggGeom.SphylElems)
-			{
-				FCapsuleInformation CapsuleInformation;
-
-				CapsuleInformation.Location = CapsuleElem.GetTransform().GetLocation();
-				CapsuleInformation.Rotation = CapsuleElem.Rotation;
-				CapsuleInformation.HalfHeight = CapsuleElem.GetScaledHalfLength(BodySetup->BuildScale3D);
-				CapsuleInformation.Radius = CapsuleElem.GetScaledRadius(BodySetup->BuildScale3D);
-
-				Package.HitBoxInfo.Add(CapsuleElem.GetName(), CapsuleInformation);
-
-				DrawDebugCapsule(
-					GetWorld(),
-					BoneTransform.GetLocation(),
-					CapsuleElem.GetScaledHalfLength(BodySetup->BuildScale3D),
-					CapsuleElem.GetScaledRadius(BodySetup->BuildScale3D),
-					BoneTransform.GetRotation(),
-					FColor::Red,
-					true
-				);
-			}
+			Package.HitBoxInfo.Add(HitBoxInfo.Key, CapsuleInformation);
 		}
+		
 	}
 }
 
 void ULagComponent::ShowFramePackage(const FFramePackage& Package, const FColor& Color)
 {
-	for (auto& BoxInfo : Package.HitBoxInfo)
+	for (const auto& BoxInfo : Package.HitBoxInfo)
 	{
 		DrawDebugCapsule(
 			GetWorld(),
@@ -89,8 +84,9 @@ void ULagComponent::ShowFramePackage(const FFramePackage& Package, const FColor&
 			BoxInfo.Value.HalfHeight,
 			BoxInfo.Value.Radius,
 			FQuat(BoxInfo.Value.Rotation),
-			FColor::Red,
-			true
+			Color,
+			false,
+			4.f
 		);
 	}
 

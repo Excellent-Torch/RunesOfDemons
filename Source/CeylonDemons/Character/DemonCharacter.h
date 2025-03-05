@@ -18,7 +18,30 @@ class UInputMappingContext;
 class UInputComponent;
 class UInputAction;
 class UInputMappingContext;
+class UCapsuleComponent;
 struct FInputActionValue;
+
+USTRUCT(BlueprintType)
+struct FPhysicsAssetInformation
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FName BoneName;
+
+	UPROPERTY()
+	FTransform Transform;
+
+	UPROPERTY()
+	FRotator Rotation;
+
+	UPROPERTY()
+	float HalfHeight;
+
+	UPROPERTY()
+	float Radius;
+
+};
 
 
 UCLASS()
@@ -126,8 +149,17 @@ public:
 	void MulticastLostTheLead();
 
 	// Hit Boxes
+	UPROPERTY()
+	TMap<FName, class UCapsuleComponent*> HitBoxInfo;
 
-	
+	UPROPERTY()
+	TArray<FPhysicsAssetInformation> PhysicsAssetInfo;
+
+	UPROPERTY()
+	void SetupHitBox();
+
+	UPROPERTY()
+	void ConstructHitBox(FPhysicsAssetInformation PhysicsAssetInfo);
 
 protected:
 	virtual void BeginPlay() override;
