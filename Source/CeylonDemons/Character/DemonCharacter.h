@@ -11,16 +11,6 @@
 #include "MediaPlayer.h"
 #include "DemonCharacter.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftGame);
-
-
-class UInputMappingContext;
-class UInputComponent;
-class UInputAction;
-class UInputMappingContext;
-class UCapsuleComponent;
-struct FInputActionValue;
-
 USTRUCT(BlueprintType)
 struct FPhysicsAssetInformation
 {
@@ -42,6 +32,18 @@ struct FPhysicsAssetInformation
 	float Radius;
 
 };
+
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftGame);
+
+
+class UInputMappingContext;
+class UInputComponent;
+class UInputAction;
+class UInputMappingContext;
+class UCapsuleComponent;
+struct FInputActionValue;
+
 
 
 UCLASS()
@@ -152,13 +154,13 @@ public:
 	UPROPERTY()
 	TMap<FName, class UCapsuleComponent*> HitBoxInfo;
 
-	UPROPERTY()
-	TArray<FPhysicsAssetInformation> PhysicsAssetInfo;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//TArray<FPhysicsAssetInformation> PhysicsAssetInfo;
 
-	UPROPERTY()
+	UFUNCTION()
 	void SetupHitBox();
 
-	UPROPERTY()
+	UFUNCTION()
 	void ConstructHitBox(FPhysicsAssetInformation PhysicsAssetInfo);
 
 protected:

@@ -255,13 +255,12 @@ void ADemonCharacter::SavePlayerLocation()
 
 void ADemonCharacter::SetupHitBox()
 {
+	if (GetMesh() == nullptr) return;
 	UPhysicsAsset* PhysicsAsset = GetMesh()->GetPhysicsAsset();
 	if (!PhysicsAsset) return;
 
-
 	FPhysicsAssetInformation CapsuleInformation;
-
-	for (auto BodySetup : PhysicsAsset->SkeletalBodySetups)
+	for (const auto& BodySetup : PhysicsAsset->SkeletalBodySetups)
 	{
 		if (!BodySetup) continue;
 
@@ -271,19 +270,19 @@ void ADemonCharacter::SetupHitBox()
 
 		FTransform BoneTransform = GetMesh()->GetBoneTransform(BoneIndex);
 
-
-		for (auto CapsuleElem : BodySetup->AggGeom.SphylElems)
+		
+		for (const auto& CapsuleElem : BodySetup->AggGeom.SphylElems)
 		{
 			//BoneTransform.TransformPosition(CapsuleElem.Center);
 			CapsuleInformation.BoneName = BoneName;
-			CapsuleInformation.Transform = CapsuleElem.GetTransform();
+			CapsuleInformation.Transform = CapsuleElem.GetTransform() * BoneTransform;
 			CapsuleInformation.Rotation = CapsuleElem.Rotation;
 			CapsuleInformation.HalfHeight = CapsuleElem.Length * 0.5f;
 			CapsuleInformation.Radius = CapsuleElem.Radius;
 
 			//PhysicsAssetInfo.Add(CapsuleInformation);
-			ConstructHitBox(CapsuleInformation);
 
+			ConstructHitBox(CapsuleInformation);
 			//CapsuleInformation.Add(BoneName, CapsuleInformation);
 		}
 	}
@@ -308,7 +307,7 @@ void ADemonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//UpdateSpecialEffects();
+	SetupHitBox();
 	UpdateHUDAmmo();
 	SetMeshHealthBar();
 	SetMeshShieldBar();

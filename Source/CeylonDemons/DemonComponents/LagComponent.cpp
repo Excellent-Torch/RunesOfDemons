@@ -20,6 +20,7 @@ void ULagComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	
 	if (FrameHistory.Num() <= 1)
 	{
 		FFramePackage ThisFrame;
@@ -39,15 +40,13 @@ void ULagComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		FrameHistory.AddHead(ThisFrame);
 		//ShowFramePackage(ThisFrame, FColor::Red);
 	}
+
 }
 
 void ULagComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	FFramePackage Package;
-	SaveFramePackage(Package);
-	ShowFramePackage(Package, FColor::Orange);
 }
 
 void ULagComponent::SaveFramePackage(FFramePackage& Package)
@@ -56,27 +55,24 @@ void ULagComponent::SaveFramePackage(FFramePackage& Package)
 	
 	if (Character)
 	{
-
+		Package.Time = GetWorld()->GetTimeSeconds();
 		for (auto& HitBoxInfo : Character->HitBoxInfo)
 		{
 			FCapsuleInformation CapsuleInformation;
-			//BoneTransform.TransformPosition(CapsuleElem.Center);
+
 			CapsuleInformation.Location = HitBoxInfo.Value->GetComponentLocation();
 			CapsuleInformation.Rotation = HitBoxInfo.Value->GetComponentRotation();
 			CapsuleInformation.HalfHeight = HitBoxInfo.Value->GetScaledCapsuleHalfHeight();
 			CapsuleInformation.Radius = HitBoxInfo.Value->GetScaledCapsuleRadius();
 			
-		
-
 			Package.HitBoxInfo.Add(HitBoxInfo.Key, CapsuleInformation);
 		}
-		
 	}
 }
 
 void ULagComponent::ShowFramePackage(const FFramePackage& Package, const FColor& Color)
 {
-	for (const auto& BoxInfo : Package.HitBoxInfo)
+	for (auto& BoxInfo : Package.HitBoxInfo)
 	{
 		DrawDebugCapsule(
 			GetWorld(),
