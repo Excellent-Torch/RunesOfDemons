@@ -79,7 +79,8 @@ void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 
 	if (SolidImpactParticles)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SolidImpactParticles, GetActorTransform());
+		UNiagaraComponent* SolidImpactNiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), SolidImpactParticles, GetActorLocation());
+		SolidImpactNiagaraComp->SetAutoDestroy(true);
 	}
 	if (SolidImpactSound)
 	{

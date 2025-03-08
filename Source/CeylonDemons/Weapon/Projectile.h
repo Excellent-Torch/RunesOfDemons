@@ -42,13 +42,13 @@ protected:
 	// New Method for Character Impact Particles and Sound
 
 	UPROPERTY(EditAnywhere)
-	class UParticleSystem* SolidImpactParticles;
+	class UNiagaraSystem* SolidImpactParticles;
 
 	UPROPERTY(EditAnywhere)
 	class USoundCue* SolidImpactSound;
 
 	UPROPERTY(EditAnywhere)
-	class UParticleSystem* PlayerImpactParticles;
+	class UNiagaraSystem* PlayerImpactParticles;
 
 	UPROPERTY(EditAnywhere)
 	class USoundCue* PlayerImpactSound;

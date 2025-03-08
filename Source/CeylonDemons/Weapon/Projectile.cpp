@@ -1,8 +1,9 @@
 #include "Projectile.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Particles/ParticleSystemComponent.h"
-#include "Particles/ParticleSystem.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 #include "Sound/SoundCue.h"
 #include "CeylonDemons/Character/DemonCharacter.h"
 #include "CeylonDemons/PlayerController/DemonPlayerController.h"
@@ -74,7 +75,8 @@ void AProjectile::MulticastHitFX_Implementation(FVector_NetQuantize HitLocation,
 	{
 		if (PlayerImpactParticles)
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), PlayerImpactParticles, HitLocation);
+			UNiagaraComponent* PlayerImpactNiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), PlayerImpactParticles, HitLocation);
+			PlayerImpactNiagaraComp->SetAutoDestroy(true);			
 		}
 
 		if (PlayerImpactSound)
@@ -86,7 +88,8 @@ void AProjectile::MulticastHitFX_Implementation(FVector_NetQuantize HitLocation,
 	{
 		if (SolidImpactParticles)
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SolidImpactParticles, HitLocation);
+			UNiagaraComponent* SolidImpactNiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), SolidImpactParticles, HitLocation);
+			SolidImpactNiagaraComp->SetAutoDestroy(true);
 		}
 		if (SolidImpactSound)
 		{

@@ -1,5 +1,7 @@
 #include "ProjectileGrenade.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 
@@ -43,7 +45,8 @@ void AProjectileGrenade::Destroyed()
 
 	if (SolidImpactParticles)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SolidImpactParticles, GetActorTransform());
+		UNiagaraComponent* SolidImpactNiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), SolidImpactParticles, GetActorLocation());
+		SolidImpactNiagaraComp->SetAutoDestroy(true);
 	}
 	if (SolidImpactSound)
 	{

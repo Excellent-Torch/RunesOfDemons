@@ -7,8 +7,12 @@
 void UElimAnnouncement::SetElimAnnouncementText(FString AttackerName, FString VictimName)
 {
 	FString ElimAnnouncementText = FString::Printf(TEXT("%s Killed %s!"), *AttackerName, *VictimName);
-	if (AnnouncementText)
+	if (AnnouncementText && AnnouncementTextAnimation)
 	{
 		AnnouncementText->SetText(FText::FromString(ElimAnnouncementText));
+
+		this->PlayAnimation(
+			AnnouncementTextAnimation,
+			0.f);
 	}
 }

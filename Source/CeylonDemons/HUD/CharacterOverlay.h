@@ -17,8 +17,14 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* ScoreAmount;
 
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	class UWidgetAnimation* ScoreAmountAnimation;
+
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* DeathsAmount;
+
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	class UWidgetAnimation* DeathAmountAnimation;
 
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* WeaponAmmoAmount;

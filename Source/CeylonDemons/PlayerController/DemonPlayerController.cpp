@@ -243,11 +243,16 @@ void ADemonPlayerController::SetHUDScore(float Score)
 	DemonHUD = DemonHUD == nullptr ? Cast<ADemonHUD>(GetHUD()) : DemonHUD;
 	bool bHUDValid = DemonHUD &&
 		DemonHUD->CharacterOverlay &&
-		DemonHUD->CharacterOverlay->ScoreAmount;
+		DemonHUD->CharacterOverlay->ScoreAmount &&
+		DemonHUD->CharacterOverlay->ScoreAmountAnimation;
 	if (bHUDValid)
 	{
 		FString ScoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(Score));
 		DemonHUD->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
+
+		DemonHUD->CharacterOverlay->PlayAnimation(
+			DemonHUD->CharacterOverlay->ScoreAmountAnimation,
+			0.f);
 	}
 	else
 	{
@@ -261,11 +266,16 @@ void ADemonPlayerController::SetHUDDeaths(int32 Deaths)
 	DemonHUD = DemonHUD == nullptr ? Cast<ADemonHUD>(GetHUD()) : DemonHUD;
 	bool bHUDValid = DemonHUD &&
 		DemonHUD->CharacterOverlay &&
-		DemonHUD->CharacterOverlay->DeathsAmount;
+		DemonHUD->CharacterOverlay->DeathsAmount &&
+		DemonHUD->CharacterOverlay->DeathAmountAnimation;
 	if (bHUDValid)
 	{
 		FString DeathsText = FString::Printf(TEXT("%d"), Deaths);
 		DemonHUD->CharacterOverlay->DeathsAmount->SetText(FText::FromString(DeathsText));
+
+		DemonHUD->CharacterOverlay->PlayAnimation(
+			DemonHUD->CharacterOverlay->DeathAmountAnimation,
+			0.f);
 	}
 	else
 	{

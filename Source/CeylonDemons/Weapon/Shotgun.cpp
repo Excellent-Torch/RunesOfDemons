@@ -5,7 +5,9 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "CeylonDemons/Character/DemonCharacter.h"
 #include "Kismet/GameplayStatics.h"
-#include "Particles/ParticleSystemComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 #include "Sound/SoundCue.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -43,12 +45,8 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 				}
 				if (SolidImpactParticles)
 				{
-					UGameplayStatics::SpawnEmitterAtLocation(
-						GetWorld(),
-						SolidImpactParticles,
-						FireHit.ImpactPoint,
-						FireHit.ImpactNormal.Rotation()
-					);
+					UNiagaraComponent* SolidImpactNiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), SolidImpactParticles, FireHit.ImpactPoint, FireHit.ImpactNormal.Rotation());
+					SolidImpactNiagaraComp->SetAutoDestroy(true);
 				}
 				if (SolidImpactSound)
 				{

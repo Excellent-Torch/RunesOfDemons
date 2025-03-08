@@ -22,5 +22,8 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* AnnouncementText;
+
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	class UWidgetAnimation* AnnouncementTextAnimation;
 	
 };

@@ -5,7 +5,9 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "CeylonDemons/Character/DemonCharacter.h"
 #include "Kismet/GameplayStatics.h"
-#include "Particles/ParticleSystemComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 #include "Sound/SoundCue.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "WeaponTypes.h"
@@ -73,7 +75,8 @@ void AHitScanWeapon::MulticastHitFX_Implementation(FVector_NetQuantize HitLocati
 	{
 		if (PlayerImpactParticles)
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), PlayerImpactParticles, HitLocation);
+			UNiagaraComponent* PlayerImpactNiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), PlayerImpactParticles, HitLocation);
+			PlayerImpactNiagaraComp->SetAutoDestroy(true);			
 		}
 		if (PlayerImpactSound)
 		{
@@ -84,7 +87,8 @@ void AHitScanWeapon::MulticastHitFX_Implementation(FVector_NetQuantize HitLocati
 	{
 		if (SolidImpactParticles)
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SolidImpactParticles, HitLocation);
+			UNiagaraComponent* SolidImpactNiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), SolidImpactParticles, HitLocation);
+			SolidImpactNiagaraComp->SetAutoDestroy(true);
 		}
 		if (SolidImpactSound)
 		{
