@@ -68,4 +68,12 @@ public:
 	UPROPERTY(meta = (BindWidgetAnim), Transient)
 	UWidgetAnimation* SpeedLinesAnimation;
 
+	UPROPERTY(meta = (BindWidget))
+	class UImage* HeadShot;
+
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	UWidgetAnimation* HeadShotAnimation;
+
+
+
 };

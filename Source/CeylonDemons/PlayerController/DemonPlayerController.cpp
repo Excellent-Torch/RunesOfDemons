@@ -205,6 +205,7 @@ void ADemonPlayerController::ShowReturnToMainMenu()
 	}
 }
 
+
 void ADemonPlayerController::ServerCheckMatchState_Implementation()
 {
 	ADemonGameMode* GameMode = Cast<ADemonGameMode>(UGameplayStatics::GetGameMode(this));
@@ -445,7 +446,9 @@ void ADemonPlayerController::ClientDamageText_Implementation()
 		DemonHUD->CharacterOverlay->DamageText &&
 		DemonHUD->CharacterOverlay->DamageTextAnimation &&
 		DemonHUD->CharacterOverlay->HitMark &&
-		DemonHUD->CharacterOverlay->HitMarkAnimation;
+		DemonHUD->CharacterOverlay->HitMarkAnimation &&
+		DemonHUD->CharacterOverlay->HeadShot &&
+		DemonHUD->CharacterOverlay->HeadShotAnimation;
 
 	ADemonCharacter* DemonCharacter = Cast<ADemonCharacter>(GetPawn());
 	if (bHUDValid && DemonCharacter && DemonCharacter->GetDamageScore())
@@ -475,6 +478,30 @@ void ADemonPlayerController::ClientDamageText_Implementation()
 
 	}
 }
+
+void ADemonPlayerController::SetHUDHeadShot(bool bHeadHit)
+{
+	ClientHeadShot(bHeadHit);
+}
+
+void ADemonPlayerController::ClientHeadShot_Implementation(bool bHeadHit)
+{
+	DemonHUD = DemonHUD == nullptr ? Cast<ADemonHUD>(GetHUD()) : DemonHUD;
+	bool bHUDValid = DemonHUD &&
+		DemonHUD->CharacterOverlay &&
+		DemonHUD->CharacterOverlay->HeadShot &&
+		DemonHUD->CharacterOverlay->HeadShotAnimation;
+
+	if (bHUDValid && bHeadHit)
+	{
+		DemonHUD->CharacterOverlay->HeadShot->SetColorAndOpacity(FLinearColor(1.0f, 0.0f, 0.0f, 1.0f));
+		DemonHUD->CharacterOverlay->HeadShot->SetRenderOpacity(1.f);
+		DemonHUD->CharacterOverlay->PlayAnimation(
+			DemonHUD->CharacterOverlay->HeadShotAnimation,
+			0.f);
+	}
+}
+
 
 
 void ADemonPlayerController::SetHUDTime()
@@ -545,7 +572,10 @@ void ADemonPlayerController::ServerRequestServerTime_Implementation(float TimeOf
 void ADemonPlayerController::ClientReportServerTime_Implementation(float TimeOfClientRequest, float TimeServerReceivedClientRequest)
 {
 	float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeOfClientRequest;
-	float CurrentServerTime = TimeServerReceivedClientRequest + (0.5f * RoundTripTime);
+
+	SingleTripTime = 0.5f * RoundTripTime;
+	float CurrentServerTime = TimeServerReceivedClientRequest + SingleTripTime;
+
 	ClientServerDelta = CurrentServerTime - GetWorld()->GetTimeSeconds();
 }
 float ADemonPlayerController::GetServerTime()

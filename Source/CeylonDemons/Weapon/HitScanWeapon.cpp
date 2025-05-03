@@ -4,6 +4,7 @@
 #include "HitScanWeapon.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "CeylonDemons/Character/DemonCharacter.h"
+#include "CeylonDemons/PlayerController/DemonPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
@@ -13,6 +14,7 @@
 #include "WeaponTypes.h"
 #include "DrawDebugHelpers.h"
 #include <Net/UnrealNetwork.h>
+#include "CeylonDemons/DemonComponents/LagComponent.h"
 
 void AHitScanWeapon::Fire(const FVector& HitTarget)
 {
@@ -31,15 +33,49 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		WeaponTraceHit(Start, HitTarget, FireHit);
 
 		ADemonCharacter* DemonCharacter = Cast<ADemonCharacter>(FireHit.GetActor());
-		if (DemonCharacter && HasAuthority() && InstigatorController)
+		if (DemonCharacter && InstigatorController)
 		{
-			UGameplayStatics::ApplyDamage(
-				DemonCharacter,
-				Damage,
-				InstigatorController,
-				this,
-				UDamageType::StaticClass()
-			);
+			if (HasAuthority() && !bUseServerSideRewind && !FireHit.GetComponent()->GetName().Contains("HeadBox"))
+			{
+				DemonCharacter->ServerHeadBoxHit(false);
+				UGameplayStatics::ApplyDamage(
+					DemonCharacter,
+					Damage,
+					InstigatorController,
+					this,
+					UDamageType::StaticClass()
+				);
+			}
+			if (HasAuthority() && !bUseServerSideRewind && FireHit.GetComponent()->GetName().Contains("HeadBox"))
+			{
+
+				DemonCharacter->ServerHeadBoxHit(true);
+
+				UGameplayStatics::ApplyDamage(
+					DemonCharacter,
+					Damage,
+					InstigatorController,
+					this,
+					UDamageType::StaticClass()
+				);
+			}
+
+			if (!HasAuthority() && bUseServerSideRewind)
+			{
+				DemonOwnerCharacter = DemonOwnerCharacter == nullptr ? Cast<ADemonCharacter>(OwnerPawn) : DemonOwnerCharacter;
+				DemonOwnerController = DemonOwnerController == nullptr ? Cast<ADemonPlayerController>(InstigatorController) : DemonOwnerController;
+
+				if (DemonOwnerController && DemonOwnerCharacter && DemonOwnerCharacter->GetLagComponent())
+				{
+					DemonOwnerCharacter->GetLagComponent()->ServerScoreRequest(
+						DemonCharacter,
+						Start,
+						HitTarget,
+						DemonOwnerController->GetServerTime() - DemonOwnerController->SingleTripTime,
+						this
+					);
+				}
+			}
 		}
 		if (MuzzleFlash)
 		{

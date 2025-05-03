@@ -42,6 +42,7 @@ class UInputComponent;
 class UInputAction;
 class UInputMappingContext;
 class UCapsuleComponent;
+class UBoxComponent;
 struct FInputActionValue;
 
 
@@ -152,7 +153,7 @@ public:
 
 	// Hit Boxes
 	UPROPERTY()
-	TMap<FName, class UCapsuleComponent*> HitBoxInfo;
+	TMap<FName, class UCapsuleComponent*> HitCapsuleCollisions;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	//TArray<FPhysicsAssetInformation> PhysicsAssetInfo;
@@ -161,7 +162,21 @@ public:
 	void SetupHitBox();
 
 	UFUNCTION()
-	void ConstructHitBox(FPhysicsAssetInformation PhysicsAssetInfo);
+	void ConstructHitBox(FPhysicsAssetInformation& PhysicsAssetInfo);
+
+	UFUNCTION()
+	void OnHeadBoxHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	UFUNCTION(Server, Reliable)
+	void ServerHeadBoxHit(bool bHeadHit);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastHeadBoxHit(bool bHeadHit);
+
+
+	UPROPERTY(Replicated)
+	bool bHeadShot = false;
 
 protected:
 	virtual void BeginPlay() override;
@@ -222,6 +237,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* ShieldBarMesh;
+
+	UPROPERTY(VisibleAnywhere, Category = "HitBox")
+	class UBoxComponent* HeadBox;
 
 	UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
 	class AWeapon* OverlappingWeapon;
@@ -352,7 +370,10 @@ private:
 	void OnRep_DamageScore(int32 DmgScore);
 
 	UPROPERTY(EditAnywhere)
-	class USoundCue* ElimCycloneSound;
+	class USoundCue* ElimSound;
+
+	UPROPERTY(EditAnywhere)
+	class USoundCue* HeadShotElimSound;
 
 	UPROPERTY()
 	class ADemonPlayerState* DemonPlayerState;
@@ -402,7 +423,11 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool IsElimmed() const { return bElimmed; }
+
 	FORCEINLINE bool IsGettingHit() const { return bGettingHit; }
+
+	UFUNCTION(BlueprintCallable)
+	bool IsHeadShot() const { return bHeadShot; }
 	
 	UFUNCTION(BlueprintCallable)
 	float GetHealth() const { return Health; }
@@ -417,6 +442,7 @@ public:
 	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
 	FORCEINLINE UBuffComponent* GetBuff() const { return Buff; }
 	FORCEINLINE int32 GetDamageScore() const { return DamageScore; }
+	FORCEINLINE ULagComponent* GetLagComponent() const { return LagComponent; }
 
 	// Animation Montages
 

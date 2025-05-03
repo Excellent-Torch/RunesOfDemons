@@ -22,9 +22,6 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastHitFX(FVector_NetQuantize HitLocation, bool bHitPlayer);
 
-	UPROPERTY(EditAnywhere)
-	float Damage = 25.f;
-
 	// New Method for Character Impact Particles and Sound
 
 	UPROPERTY(EditAnywhere)
@@ -41,10 +38,6 @@ protected:
 
 	// ---- ///
 
-	
-
-private:
-
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* BeamParticles;
 
@@ -53,5 +46,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	USoundCue* FireSound;
+
+private:
+
+	
 
 };

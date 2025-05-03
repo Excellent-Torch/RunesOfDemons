@@ -26,6 +26,7 @@ public:
 	void SetHUDSpeedLines(bool bPressed);
 	void SetHUDHitMark(bool bGettingHit);
 	void SetHUDDamageText();
+	void SetHUDHeadShot(bool bHeadHit);
 
 
 	virtual void OnPossess(APawn* InPawn) override;
@@ -39,6 +40,8 @@ public:
 	void HandleCooldown();
 
 	void BroadcastElim(APlayerState* Attacker, APlayerState* Victim);
+
+	float SingleTripTime = 0.f;
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
@@ -92,6 +95,9 @@ protected:
 
 	UFUNCTION(Client, Reliable)
 	void ClientDamageText();
+
+	UFUNCTION(Client, Reliable)
+	void ClientHeadShot(bool bHeadHit);
 private:
 	UPROPERTY()
 	class ADemonHUD* DemonHUD;

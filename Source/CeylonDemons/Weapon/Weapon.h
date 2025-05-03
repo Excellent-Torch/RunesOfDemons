@@ -76,11 +76,6 @@ private:
 	// Incremented in SpendRound, decremented in ClientUpdateAmmo.
 	int32 Sequence = 0;
 
-	UPROPERTY()
-	class ADemonCharacter* DemonOwnerCharacter;
-	UPROPERTY()
-	class ADemonPlayerController* DemonOwnerController;
-
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
 
@@ -106,6 +101,7 @@ public:
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
+	FORCEINLINE float GetDamage() const { return Damage; }
 	/**
 	* Textures for the weapon Crosshairs
 	*/
@@ -195,4 +191,16 @@ protected:
 	float DistanceToSphere = 800.f;
 	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
 	float SphereRadius = 75.f;
+
+	UPROPERTY(EditAnywhere)
+	float Damage = 25.f;
+
+	UPROPERTY(EditAnywhere)
+	bool bUseServerSideRewind = false;
+
+	UPROPERTY()
+	class ADemonCharacter* DemonOwnerCharacter;
+
+	UPROPERTY()
+	class ADemonPlayerController* DemonOwnerController;
 };

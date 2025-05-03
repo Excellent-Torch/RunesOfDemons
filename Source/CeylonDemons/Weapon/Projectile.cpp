@@ -59,9 +59,12 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 {
 	bGettingHit = false;
 	ADemonCharacter* HitPlayer = Cast<ADemonCharacter>(OtherActor);
+
+	FHitResult FireHit;
 	if (HitPlayer && HitPlayer->IsElimmed() == false)
 	{
 		bGettingHit = true;
+
 		HitPlayer->MulticastHit();
 	}
 	MulticastHitFX(Hit.ImpactPoint, bGettingHit);

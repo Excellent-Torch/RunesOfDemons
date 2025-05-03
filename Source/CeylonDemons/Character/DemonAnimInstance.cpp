@@ -29,12 +29,6 @@ void UDemonAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	Velocity.Z = 0.f;
 	Speed = Velocity.Size();
 
-
-	//FString SSpeed = FString::Printf(TEXT("%f"),Speed);
-
-	//if (GEngine)
-	//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, SSpeed);
-
 	bIsInAir = DemonCharacter->GetCharacterMovement()->IsFalling();
 
 	bIsAccelerating = DemonCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;

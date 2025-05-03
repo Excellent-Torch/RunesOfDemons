@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/BoxComponent.h"
 
 #include "PhysicsEngine/PhysicsAsset.h"
 #include "PhysicsEngine/BodySetup.h"
@@ -86,6 +87,19 @@ ADemonCharacter::ADemonCharacter()
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 360.f, 0.f);
 
+	// Head Box
+	HeadBox = CreateDefaultSubobject<UBoxComponent>(TEXT("HeadBox Component"));
+	HeadBox->SetupAttachment(GetMesh(), FName("J_Bip_C_Head"));
+	
+	HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	HeadBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	HeadBox->SetCollisionResponseToChannel(ECC_Visibility, ECollisionResponse::ECR_Block);
+	HeadBox->SetCollisionResponseToChannel(ECC_WorldDynamic, ECollisionResponse::ECR_Block);
+
+	HeadBox->OnComponentHit.AddDynamic(this, &ADemonCharacter::OnHeadBoxHit);
+
+	// END Head Box
+
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	SetNetUpdateFrequency(66.f);
 	SetMinNetUpdateFrequency(33.f);
@@ -100,6 +114,7 @@ void ADemonCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(ADemonCharacter, Shield);
 	DOREPLIFETIME(ADemonCharacter, DamageScore);
 	DOREPLIFETIME(ADemonCharacter, bDisableGameplay);
+	DOREPLIFETIME(ADemonCharacter, bHeadShot);
 }
 
 void ADemonCharacter::OnRep_ReplicatedMovement()
@@ -129,8 +144,16 @@ void ADemonCharacter::ElimTimerFinished()
 
 void ADemonCharacter::OnRep_DamageScore(int32 DmgScore)
 {
-	DamageScore = DmgScore;
+	if (bHeadShot)
+	{
+		DamageScore = DmgScore + 50;
+	}
+	else
+	{
+		DamageScore = DmgScore;
+	}
 }
+	
 
 void ADemonCharacter::ServerLeaveGame_Implementation()
 {
@@ -151,27 +174,40 @@ void ADemonCharacter::MulticastElim_Implementation(bool bPlayerLeftGame)
 		DemonPlayerController->SetHUDWeaponAmmo(0);
 	}
 
-	// Spawn Elim Cyclone
-	if (ElimCycloneEffect)
-	{
-		FVector ElimCycloneSpawnPoint(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 200.f);
-		ElimCycloneComponent = UGameplayStatics::SpawnEmitterAtLocation(
-			GetWorld(),
-			ElimCycloneEffect,
-			ElimCycloneSpawnPoint,
-			GetActorRotation()
-		);
-	}
-	if (ElimCycloneSound)
+	
+	
+	
+	bElimmed = true;
+
+	if (bHeadShot && ElimSound)
 	{
 		UGameplayStatics::SpawnSoundAtLocation(
 			this,
-			ElimCycloneSound,
+			HeadShotElimSound,
+			GetActorLocation()
+		);
+
+		// Spawn Elim Cyclone
+		if (ElimCycloneEffect)
+		{
+			FVector ElimCycloneSpawnPoint(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 200.f);
+			ElimCycloneComponent = UGameplayStatics::SpawnEmitterAtLocation(
+				GetWorld(),
+				ElimCycloneEffect,
+				ElimCycloneSpawnPoint,
+				GetActorRotation()
+			);
+		}
+	}
+	else
+	{
+		UGameplayStatics::SpawnSoundAtLocation(
+			this,
+			ElimSound,
 			GetActorLocation()
 		);
 	}
-	
-	bElimmed = true;
+
 
 	// Disable Character Movement
 	//GetCharacterMovement()->DisableMovement();
@@ -212,9 +248,15 @@ void ADemonCharacter::MulticastElim_Implementation(bool bPlayerLeftGame)
 
 			// Apply an impulse
 			FVector ImpulseDirection = FVector(FMath::RandRange(-200.0f, 200.0f), FMath::RandRange(-200.0f, 200.0f), 500.0f);
+
+			//FName HeadBone = "J_Bip_C_Head";
+			//if (bHeadShot) MeshComp->BreakConstraint(FVector::ZeroVector, FVector::ZeroVector, HeadBone);
+
 			MeshComp->AddImpulse(ImpulseDirection * ElimImpulseStrength, NAME_None, true);
 		}
 	}
+
+
 
 	bDisableGameplay = true;
 
@@ -260,9 +302,15 @@ void ADemonCharacter::SetupHitBox()
 	if (!PhysicsAsset) return;
 
 	FPhysicsAssetInformation CapsuleInformation;
-	for (const auto& BodySetup : PhysicsAsset->SkeletalBodySetups)
+
+	/*
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("ASSSSS!"));
+	*/
+
+	for (auto& BodySetup : PhysicsAsset->SkeletalBodySetups)
 	{
-		if (!BodySetup) continue;
+		if (BodySetup) continue;
 
 		FName BoneName = BodySetup->BoneName;
 		int32 BoneIndex = GetMesh()->GetBoneIndex(BoneName);
@@ -271,7 +319,7 @@ void ADemonCharacter::SetupHitBox()
 		FTransform BoneTransform = GetMesh()->GetBoneTransform(BoneIndex);
 
 		
-		for (const auto& CapsuleElem : BodySetup->AggGeom.SphylElems)
+		for (auto CapsuleElem : BodySetup->AggGeom.SphylElems)
 		{
 			//BoneTransform.TransformPosition(CapsuleElem.Center);
 			CapsuleInformation.BoneName = BoneName;
@@ -288,7 +336,7 @@ void ADemonCharacter::SetupHitBox()
 	}
 }
 
-void ADemonCharacter::ConstructHitBox(FPhysicsAssetInformation PhysicsAssetInfo)
+void ADemonCharacter::ConstructHitBox(FPhysicsAssetInformation& PhysicsAssetInfo)
 {
 	UCapsuleComponent* HitCapsule;
 	HitCapsule = NewObject<UCapsuleComponent>(this, UCapsuleComponent::StaticClass(), PhysicsAssetInfo.BoneName, RF_Transient);
@@ -300,14 +348,46 @@ void ADemonCharacter::ConstructHitBox(FPhysicsAssetInformation PhysicsAssetInfo)
 	HitCapsule->SetCapsuleRadius(PhysicsAssetInfo.Radius);
 
 	HitCapsule->RegisterComponent();
-	HitBoxInfo.Add(PhysicsAssetInfo.BoneName, HitCapsule);
+	if (HitCapsule)
+	{
+		HitCapsuleCollisions.Add(PhysicsAssetInfo.BoneName, HitCapsule);
+
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, PhysicsAssetInfo.BoneName.ToString());
+	}
+}
+
+void ADemonCharacter::OnHeadBoxHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	//if (!HasAuthority()) return;
+
+	if (OtherActor && OtherActor != this)
+	{
+		ServerHeadBoxHit(true);
+	}
+	else
+	{
+		ServerHeadBoxHit(false);
+	}
+}
+
+void ADemonCharacter::ServerHeadBoxHit_Implementation(bool bHeadHit)
+{
+	bHeadShot = bHeadHit;
+	MulticastHeadBoxHit(bHeadHit);
+
+}
+
+void ADemonCharacter::MulticastHeadBoxHit_Implementation(bool bHeadHit)
+{
+	bHeadShot = bHeadHit;
 }
 
 void ADemonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetupHitBox();
+	//SetupHitBox();
 	UpdateHUDAmmo();
 	SetMeshHealthBar();
 	SetMeshShieldBar();
@@ -600,6 +680,12 @@ void ADemonCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UD
 	if (bElimmed) return;
 
 	float DamageToHealth = Damage;
+
+	if (bHeadShot)
+	{
+		DamageToHealth = Damage * 2.f;
+	}
+
 	if (Shield > 0.f)
 	{
 		if (Shield >= Damage)
@@ -629,6 +715,9 @@ void ADemonCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UD
 	if (AttackerController)
 	{
 		AttackerController->SetHUDHitMark(true);
+
+
+		
 	}
 
 	if (Health == 0.f)
@@ -637,6 +726,12 @@ void ADemonCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UD
 		if (DemonGameMode)
 		{
 			AttackerController->SetHUDDamageText();
+
+			if (bHeadShot)
+			{
+				AttackerController->SetHUDHeadShot(true);
+			}
+			
 			DemonPlayerController = DemonPlayerController == nullptr ? Cast<ADemonPlayerController>(Controller) : DemonPlayerController;
 
 			DemonGameMode->PlayerEliminated(this, DemonPlayerController, AttackerController);
