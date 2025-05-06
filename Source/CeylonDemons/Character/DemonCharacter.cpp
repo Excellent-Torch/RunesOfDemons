@@ -715,9 +715,6 @@ void ADemonCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UD
 	if (AttackerController)
 	{
 		AttackerController->SetHUDHitMark(true);
-
-
-		
 	}
 
 	if (Health == 0.f)

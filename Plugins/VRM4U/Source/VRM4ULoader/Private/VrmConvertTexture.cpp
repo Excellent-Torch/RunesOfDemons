@@ -59,6 +59,8 @@ namespace {
 		} else {
 			material->Parent = parent;
 		}
+		FMaterialUpdateContext UpdateContext(FMaterialUpdateContext::EOptions::Default, GMaxRHIShaderPlatform);
+		UpdateContext.AddMaterialInstance(material);
 #else
 		material->Parent = parent;
 #endif
@@ -494,6 +496,9 @@ namespace {
 			{
 				auto n = TextureTypeToIndex[aiTextureType_NORMALS];
 				if (n >= 0) {
+					vrmAssetList->Textures[n]->SRGB = false;
+					vrmAssetList->Textures[n]->CompressionSettings = TC_Normalmap;
+					vrmAssetList->Textures[n]->UpdateResource();
 					LocalTextureSet(dm, TEXT("mtoon_tex_Normal"), vrmAssetList->Textures[n]);
 				}
 			}

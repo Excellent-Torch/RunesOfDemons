@@ -108,7 +108,12 @@ public:
 
 		bool IsRemoveBlendShapeGroupPrefix() const;
 
+		bool IsRemoveRootBoneRotation() const;
+		bool IsRemoveRootBonePosition() const;
+
 		bool IsVRM10RemoveLocalRotation() const;
+		bool IsVRM10BindToRestPose() const;
+
 		bool IsVRM10Bindpose() const;
 
 		bool IsForceOriginalBoneName() const;
