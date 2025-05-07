@@ -37,6 +37,8 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		{
 			if (HasAuthority() && !bUseServerSideRewind && !FireHit.GetComponent()->GetName().Contains("HeadBox"))
 			{
+				MulticastHitFX(FireHit.ImpactPoint, FireHit.ImpactNormal, true);
+
 				DemonCharacter->ServerHeadBoxHit(false);
 				UGameplayStatics::ApplyDamage(
 					DemonCharacter,
@@ -48,6 +50,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 			}
 			if (HasAuthority() && !bUseServerSideRewind && FireHit.GetComponent()->GetName().Contains("HeadBox"))
 			{
+				MulticastHitFX(FireHit.ImpactPoint, FireHit.ImpactNormal, true);
 
 				DemonCharacter->ServerHeadBoxHit(true);
 
@@ -59,6 +62,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 					UDamageType::StaticClass()
 				);
 			}
+
 
 			if (!HasAuthority() && bUseServerSideRewind)
 			{
@@ -76,6 +80,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 					);
 				}
 			}
+			
 		}
 		if (MuzzleFlash)
 		{
@@ -93,19 +98,15 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 				GetActorLocation()
 			);
 		}
-
-		bool bHitPlayer = false;
-		ADemonCharacter* HitPlayer = Cast<ADemonCharacter>(FireHit.GetActor());
-		if (HitPlayer && HitPlayer->IsElimmed() == false)
+		
+		if (DemonCharacter == nullptr)
 		{
-			bHitPlayer = true;
-			HitPlayer->MulticastHit();
+			MulticastHitFX(FireHit.ImpactPoint, FireHit.ImpactNormal, false);
 		}
-		MulticastHitFX(FireHit.ImpactPoint, bHitPlayer);
 	}
 }
 
-void AHitScanWeapon::MulticastHitFX_Implementation(FVector_NetQuantize HitLocation, bool bHitPlayer)
+void AHitScanWeapon::MulticastHitFX_Implementation(FVector_NetQuantize HitLocation, FVector_NetQuantize HitRotation, bool bHitPlayer)
 {
 	if (bHitPlayer)
 	{
@@ -129,6 +130,25 @@ void AHitScanWeapon::MulticastHitFX_Implementation(FVector_NetQuantize HitLocati
 		if (SolidImpactSound)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, SolidImpactSound, HitLocation);
+		}
+
+		if (ImpactDecal)
+		{
+
+			FRotator DecalRotation = HitRotation.Rotation();
+
+			DecalRotation.Pitch -= 0.f;
+
+			FVector DecalSize = FVector(10, 10, 10);
+
+			UGameplayStatics::SpawnDecalAtLocation(
+				GetWorld(),
+				ImpactDecal,
+				DecalSize,
+				HitLocation,
+				DecalRotation,
+				10.0f // Lifespan in seconds
+			);
 		}
 	}
 }

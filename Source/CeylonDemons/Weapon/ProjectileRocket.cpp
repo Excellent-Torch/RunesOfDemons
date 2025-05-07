@@ -112,7 +112,7 @@ void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 		bHitPlayer = true;
 		HitPlayer->MulticastHit();
 	}
-	MulticastHitFX(Hit.ImpactPoint, bHitPlayer);
+	MulticastHitFX(Hit.ImpactPoint, Hit.ImpactNormal, bHitPlayer);
 
 }
 

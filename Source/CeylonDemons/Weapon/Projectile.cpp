@@ -8,6 +8,7 @@
 #include "CeylonDemons/Character/DemonCharacter.h"
 #include "CeylonDemons/PlayerController/DemonPlayerController.h"
 #include "CeylonDemons/CeylonDemons.h"
+#include "Components/DecalComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include <Net/UnrealNetwork.h>
 
@@ -67,12 +68,13 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 
 		HitPlayer->MulticastHit();
 	}
-	MulticastHitFX(Hit.ImpactPoint, bGettingHit);
+
+	MulticastHitFX(Hit.ImpactPoint, Hit.ImpactNormal, bGettingHit);
 
 	Destroy();
 }
 
-void AProjectile::MulticastHitFX_Implementation(FVector_NetQuantize HitLocation, bool bHitPlayer)
+void AProjectile::MulticastHitFX_Implementation(FVector_NetQuantize HitLocation, FVector_NetQuantize HitRotation, bool bHitPlayer)
 {
 	if (bHitPlayer)
 	{
@@ -98,6 +100,26 @@ void AProjectile::MulticastHitFX_Implementation(FVector_NetQuantize HitLocation,
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, SolidImpactSound, HitLocation);
 		}
+
+		if (ImpactDecal)
+		{
+			
+			FRotator DecalRotation = HitRotation.Rotation();
+
+			DecalRotation.Pitch -= 0.f;
+
+			FVector DecalSize = FVector(10, 10, 10);
+
+			UGameplayStatics::SpawnDecalAtLocation(
+				GetWorld(),
+				ImpactDecal,
+				DecalSize,
+				HitLocation,
+				DecalRotation,
+				10.0f // Lifespan in seconds
+			);
+		}
+		
 	}
 }
 

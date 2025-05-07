@@ -20,7 +20,7 @@ protected:
 	void WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastHitFX(FVector_NetQuantize HitLocation, bool bHitPlayer);
+	void MulticastHitFX(FVector_NetQuantize HitLocation, FVector_NetQuantize HitRotation, bool bHitPlayer);
 
 	// New Method for Character Impact Particles and Sound
 
@@ -37,6 +37,10 @@ protected:
 	class USoundCue* PlayerImpactSound;
 
 	// ---- ///
+
+	// Decals
+	UPROPERTY(EditDefaultsOnly, Category = "Decals")
+	UMaterialInterface* ImpactDecal;
 
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* BeamParticles;

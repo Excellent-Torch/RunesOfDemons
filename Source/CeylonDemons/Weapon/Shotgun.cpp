@@ -68,7 +68,7 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 				bHitPlayer = true;
 				HitPlayer->MulticastHit();
 			}
-			MulticastHitFX(FireHit.ImpactPoint, bHitPlayer);
+			MulticastHitFX(FireHit.ImpactPoint, FireHit.ImpactNormal, bHitPlayer);
 		}
 		for (auto HitPair : HitMap)
 		{

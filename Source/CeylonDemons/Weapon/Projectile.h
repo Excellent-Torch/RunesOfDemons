@@ -20,7 +20,7 @@ protected:
 	void ExplodeDamage();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastHitFX(FVector_NetQuantize HitLocation, bool bHitPlayer);
+	void MulticastHitFX(FVector_NetQuantize HitLocation, FVector_NetQuantize HitRotation, bool bHitPlayer);
 
 
 	UPROPERTY(VisibleAnywhere)
@@ -54,6 +54,10 @@ protected:
 	class USoundCue* PlayerImpactSound;
 
 	// ---- ///
+
+	// Decals
+	UPROPERTY(EditDefaultsOnly, Category = "Decals")
+	UMaterialInterface* ImpactDecal;
 
 	UPROPERTY(EditAnywhere)
 	class UNiagaraSystem* TrailSystem;
