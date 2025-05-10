@@ -74,6 +74,8 @@
 # UnWanted Content 
 
 **/Content/*
+**/RenderedClips/*
+**/CustomAssets/*
 
 !**/Content/Assets/
 !**/Content/Blueprints/
