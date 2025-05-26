@@ -244,7 +244,7 @@ void ADemonCharacter::MulticastElim_Implementation(bool bPlayerLeftGame)
 		if (MeshComp)
 		{
 			MeshComp->SetSimulatePhysics(true);
-			//MeshComp->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+			MeshComp->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 
 			// Apply an impulse
 			FVector ImpulseDirection = FVector(FMath::RandRange(-200.0f, 200.0f), FMath::RandRange(-200.0f, 200.0f), 500.0f);
@@ -1035,6 +1035,7 @@ void ADemonCharacter::Jump()
 	}
 	else
 	{
+		if (Buff && Buff->bJumpBuff && !GetCharacterMovement()->IsFalling()) { Buff->SpawnJumpDecals(); }
 		Super::Jump();
 	}
 }

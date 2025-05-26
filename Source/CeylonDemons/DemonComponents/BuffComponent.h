@@ -22,6 +22,7 @@ public:
 
 	void BuffJump(float BuffJumpVelocity, float BuffTime);
 	void SetInitialJumpVelocity(float Velocity);
+	void SpawnJumpDecals();
 
 protected:
 	virtual void BeginPlay() override;
@@ -57,9 +58,22 @@ private:
 	FTimerHandle JumpBuffTimer;
 	void ResetJump();
 	float InitialJumpVelocity;
+	bool bJumpBuff = false;
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastJumpBuff(float JumpVelocity);
+	void MulticastJumpBuff(float JumpVelocity, bool bBuffed);
+
+	UPROPERTY(EditAnywhere, Category = "Jump")
+	UMaterialInterface* JumpDecalMaterial;
+
+	UPROPERTY(EditAnywhere, Category = "Jump")
+	USoundBase* BuffJumpSound;
+
+	UPROPERTY(EditAnywhere, Category = "Jump")
+	float JumpDecalSize = 15.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Jump")
+	float JumpDecalLifeSpan = 2.0f;
 
 
 public:	

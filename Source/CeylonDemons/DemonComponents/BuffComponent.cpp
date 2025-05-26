@@ -2,6 +2,7 @@
 #include "CeylonDemons/Character/DemonCharacter.h"
 #include "CeylonDemons/DemonComponents/CombatComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 UBuffComponent::UBuffComponent()
@@ -131,6 +132,8 @@ void UBuffComponent::BuffJump(float BuffJumpVelocity, float BuffTime)
 {
 	if (Character == nullptr) return;
 
+	bJumpBuff = true;
+
 	Character->GetWorldTimerManager().SetTimer(
 		JumpBuffTimer,
 		this,
@@ -142,12 +145,51 @@ void UBuffComponent::BuffJump(float BuffJumpVelocity, float BuffTime)
 	{
 		Character->GetCharacterMovement()->JumpZVelocity = BuffJumpVelocity;
 	}
-	MulticastJumpBuff(BuffJumpVelocity);
+	MulticastJumpBuff(BuffJumpVelocity, bJumpBuff);
 }
 
 void UBuffComponent::SetInitialJumpVelocity(float Velocity)
 {
 	InitialJumpVelocity = Velocity;
+}
+
+void UBuffComponent::SpawnJumpDecals()
+{
+	if (Character == nullptr) return;
+	if (!JumpDecalMaterial || !BuffJumpSound) return;
+
+	FVector LeftFootLocation = Character->GetMesh()->GetSocketLocation(FName("LeftFoot"));
+	FVector RightFootLocation = Character->GetMesh()->GetSocketLocation(FName("RightFoot"));
+
+	FRotator DecalRotation = FRotator(-90, 0, 0); // Faces decal upward from the foot
+	FVector DecalExtent = FVector(JumpDecalSize, JumpDecalSize, JumpDecalSize);
+
+	// Jump Buff Sound
+	UGameplayStatics::SpawnSoundAtLocation(
+		GetWorld(),
+		BuffJumpSound,
+		LeftFootLocation
+	);
+
+	// Left Foot Decal
+	UGameplayStatics::SpawnDecalAtLocation(
+		GetWorld(),
+		JumpDecalMaterial,
+		DecalExtent,
+		LeftFootLocation,
+		DecalRotation,
+		JumpDecalLifeSpan
+	);
+
+	// Right Foot Decal
+	UGameplayStatics::SpawnDecalAtLocation(
+		GetWorld(),
+		JumpDecalMaterial,
+		DecalExtent,
+		RightFootLocation,
+		DecalRotation,
+		JumpDecalLifeSpan
+	);
 }
 
 void UBuffComponent::ResetJump()
@@ -156,13 +198,14 @@ void UBuffComponent::ResetJump()
 	{
 		Character->GetCharacterMovement()->JumpZVelocity = InitialJumpVelocity;
 	}
-	MulticastJumpBuff(InitialJumpVelocity);
+	MulticastJumpBuff(InitialJumpVelocity, false);
 }
 
-void UBuffComponent::MulticastJumpBuff_Implementation(float JumpVelocity)
+void UBuffComponent::MulticastJumpBuff_Implementation(float JumpVelocity, bool bBuffed)
 {
 	if (Character && Character->GetCharacterMovement())
 	{
 		Character->GetCharacterMovement()->JumpZVelocity = JumpVelocity;
+		bJumpBuff = bBuffed;
 	}
 }

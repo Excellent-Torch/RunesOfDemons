@@ -127,7 +127,7 @@ void UCombatComponent::RunButtonPressed(bool bPressed)
 		Controller = Controller == nullptr ? Cast<ADemonPlayerController>(Character->Controller) : Controller;
 		if (Controller)
 		{
-			if (bPressed && !bAiming) Controller->SetHUDSpeedLines(true); else Controller->SetHUDSpeedLines(false);
+			if (bPressed && !bAiming && Character->GetVelocity().Size() > 300) Controller->SetHUDSpeedLines(true); else Controller->SetHUDSpeedLines(false);
 		}
 	}
 }
@@ -689,20 +689,18 @@ void UCombatComponent::InterpFOV(float DeltaTime)
 	{
 		CurrentFOV = FMath::FInterpTo(CurrentFOV, EquippedWeapon->GetZoomedFOV(), DeltaTime, EquippedWeapon->GetZoomInterpSpeed());
 	}
-	if (!bAiming)
+	if (!bAiming && !bRunning)
 	{
 		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, DeltaTime, ZoomInterpSpeed);
 	}
-	if (Character && Character->GetFollowCamera())
+
+	if (!bAiming && bRunning && Character->GetVelocity().Size() > 300)
 	{
-		Character->GetFollowCamera()->SetFieldOfView(CurrentFOV);
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, RunFOV, DeltaTime, RunInterpSpeed);
 	}
 
-	if (Character && Character->GetFollowCamera() && !bAiming && bRunButtonPressed)
+	if (Character && Character->GetFollowCamera())
 	{
-
-		CurrentFOV = FMath::FInterpTo(CurrentFOV, RunFOV, DeltaTime, ZoomInterpSpeed);
-
 		Character->GetFollowCamera()->SetFieldOfView(CurrentFOV);
 	}
 
@@ -831,7 +829,7 @@ void UCombatComponent::ApplyCameraShakes()
 			Velocity.Z = 0.f;
 			Speed = Velocity.Size();
 
-			if (bRunning && bRunButtonPressed && !bAiming && !bAimButtonPressed)
+			if (bRunning && !bAiming && !bAimButtonPressed && Character->GetVelocity().Size() > 300)
 			{
 				LocalPlayerController->ClientStartCameraShake(CSM_Run);
 			}
@@ -845,7 +843,7 @@ void UCombatComponent::ApplyCameraShakes()
 			}
 			if (Character->GetVelocity().Size() > 0 && Character->CanJump() && Character->GetVelocity().Size() < 300 && !bAiming)
 			{
-				LocalPlayerController->ClientStartCameraShake(CSM_Idle, 2.f);
+				LocalPlayerController->ClientStartCameraShake(CSM_Idle, 4.f);
 			}
 			else
 			{
