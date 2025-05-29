@@ -98,7 +98,7 @@ void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 	{
 		//TrailSystemComponent->GetSystemInstanceController()->Deactivate();
 		
-	}
+	}+
 	*/
 	if (ProjectileLoopComponent && ProjectileLoopComponent->IsPlaying())
 	{
