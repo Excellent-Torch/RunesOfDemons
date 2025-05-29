@@ -86,7 +86,8 @@ void AProjectile::MulticastHitFX_Implementation(FVector_NetQuantize HitLocation,
 
 		if (PlayerImpactSound)
 		{
-			UGameplayStatics::PlaySoundAtLocation(this, PlayerImpactSound, HitLocation);
+			UGameplayStatics::PlaySound2D(this, PlayerImpactSound);
+			//UGameplayStatics::PlaySoundAtLocation(this, PlayerImpactSound, HitLocation);
 		}
 	}
 	else

@@ -19,6 +19,7 @@
 #include "CeylonDemons/DemonComponents/CombatComponent.h"
 #include "CeylonDemons/DemonComponents/BuffComponent.h"
 #include "CeylonDemons/DemonComponents/LagComponent.h"
+#include "CeylonDemons/DemonComponents/DestructionComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
@@ -69,6 +70,9 @@ ADemonCharacter::ADemonCharacter()
 	Buff->SetIsReplicated(true);
 
 	LagComponent = CreateDefaultSubobject<ULagComponent>(TEXT("LagComponent"));
+
+	DestructionComponent = CreateDefaultSubobject<UDestructionComponent>(TEXT("DestructionComponent"));
+	DestructionComponent->SetIsReplicated(true);
 
 	HealthBarMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HealthBar Component"));
 	//HealthBarMesh->SetStaticMesh(HealthBarMeshComponent);
@@ -523,6 +527,8 @@ void ADemonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		EnhancedInputComponent->BindAction(IA_Jump, ETriggerEvent::Triggered, this, &ADemonCharacter::Jump);
 		EnhancedInputComponent->BindAction(IA_Run, ETriggerEvent::Triggered, this, &ADemonCharacter::Run);
 		EnhancedInputComponent->BindAction(IA_Run, ETriggerEvent::Completed, this, &ADemonCharacter::StopRun);
+		EnhancedInputComponent->BindAction(IA_Fire, ETriggerEvent::Started, this, &ADemonCharacter::FireButtonPressed);
+		EnhancedInputComponent->BindAction(IA_Fire, ETriggerEvent::Completed, this, &ADemonCharacter::FireButtonReleased);
 	}
 
 	//PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ADemonCharacter::Jump);
@@ -539,8 +545,8 @@ void ADemonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ADemonCharacter::CrouchButtonPressed);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ADemonCharacter::AimButtonPressed);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ADemonCharacter::AimButtonReleased);
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ADemonCharacter::FireButtonPressed);
-	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ADemonCharacter::FireButtonReleased);
+	//PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ADemonCharacter::FireButtonPressed);
+	//PlayerInputComponent->BindAction("Fire", IE_Released, this, &ADemonCharacter::FireButtonReleased);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ADemonCharacter::ReloadButtonPressed);
 }
 
@@ -568,6 +574,13 @@ void ADemonCharacter::PostInitializeComponents()
 			LagComponent->Controller = Cast<ADemonPlayerController>(Controller);
 		}
 	}
+	if (DestructionComponent)
+	{
+
+		DestructionComponent->Character = this;
+
+	}
+
 }
 
 void ADemonCharacter::PlayFireMontage(bool bAiming)
@@ -1059,7 +1072,7 @@ void ADemonCharacter::Run()
 void ADemonCharacter::StopRun()
 {
 	if (bDisableGameplay) return;
-	if (Combat)
+	if (Combat && Combat->bRunning)
 	{
 		
 		bLocallyRunning = false;
@@ -1095,6 +1108,17 @@ void ADemonCharacter::FireButtonPressed()
 	{
 		StopRun();
 		Combat->FireButtonPressed(true);
+
+		
+		//if (GEngine)
+		//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Some debug message!"));
+		//DestructionComponent->FireDestruction();
+
+		if (DestructionComponent)
+		{
+			DestructionComponent->FireDestruction();
+
+		}
 	}
 }
 

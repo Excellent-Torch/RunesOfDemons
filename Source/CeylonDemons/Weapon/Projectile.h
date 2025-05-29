@@ -45,13 +45,13 @@ protected:
 	class UNiagaraSystem* SolidImpactParticles;
 
 	UPROPERTY(EditAnywhere)
-	class USoundCue* SolidImpactSound;
+	class USoundBase* SolidImpactSound;
 
 	UPROPERTY(EditAnywhere)
 	class UNiagaraSystem* PlayerImpactParticles;
 
 	UPROPERTY(EditAnywhere)
-	class USoundCue* PlayerImpactSound;
+	class USoundBase* PlayerImpactSound;
 
 	// ---- ///
 

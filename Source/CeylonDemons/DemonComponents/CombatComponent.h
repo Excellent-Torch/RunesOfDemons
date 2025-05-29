@@ -165,6 +165,7 @@ private:
 	UFUNCTION()
 	void OnRep_Running();
 
+	UPROPERTY(VisibleAnywhere)
 	bool bFireButtonPressed;
 
 
@@ -249,7 +250,7 @@ private:
 
 	void InitializeCarriedAmmo();
 
-	UPROPERTY(ReplicatedUsing = OnRep_CombatState)
+	UPROPERTY(ReplicatedUsing = OnRep_CombatState, VisibleAnywhere)
 	ECombatState CombatState = ECombatState::ECS_Unoccupied;
 
 	UFUNCTION()

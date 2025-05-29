@@ -11,6 +11,7 @@
 #include "MediaPlayer.h"
 #include "DemonCharacter.generated.h"
 
+
 USTRUCT(BlueprintType)
 struct FPhysicsAssetInformation
 {
@@ -43,6 +44,8 @@ class UInputAction;
 class UInputMappingContext;
 class UCapsuleComponent;
 class UBoxComponent;
+
+
 struct FInputActionValue;
 
 
@@ -76,6 +79,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* IA_Run;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* IA_Fire;
 
 
 	// END PLAYER INPUTS
@@ -256,6 +262,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	class ULagComponent* LagComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	class UDestructionComponent* DestructionComponent;
 
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
@@ -443,6 +452,7 @@ public:
 	FORCEINLINE UBuffComponent* GetBuff() const { return Buff; }
 	FORCEINLINE int32 GetDamageScore() const { return DamageScore; }
 	FORCEINLINE ULagComponent* GetLagComponent() const { return LagComponent; }
+	FORCEINLINE UDestructionComponent* GetDestructionComponent() const { return DestructionComponent; }
 
 	// Animation Montages
 
