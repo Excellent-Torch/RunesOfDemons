@@ -17,7 +17,7 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 		if (World)
 		{
 			bUseSeamlessTravel = true;
-			World->ServerTravel(FString("/Game/Maps/SecondDemoMap?listen"));
+			World->ServerTravel(FString("/Game/Maps/RevealTrailerMap?listen"));
 		}
 	}
 }
