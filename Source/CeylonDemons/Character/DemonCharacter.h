@@ -441,9 +441,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetHealth() const { return Health; }
 
+	UFUNCTION(BlueprintCallable)
+	float GetShield() const { return Shield; }
+
 	FORCEINLINE void SetHealth(float Amount) { Health = Amount; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
-	FORCEINLINE float GetShield() const { return Shield; }
+	//FORCEINLINE float GetShield() const { return Shield; }
 	FORCEINLINE void SetShield(float Amount) { Shield = Amount; }
 	FORCEINLINE float GetMaxShield() const { return MaxShield; }
 	ECombatState GetCombatState() const;
